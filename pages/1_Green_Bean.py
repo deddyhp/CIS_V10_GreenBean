@@ -11,6 +11,25 @@ db.create_database()
 
 st.title("🌱 Green Bean Database")
 
+st.subheader("🆕 Green Bean History")
+
+st.markdown("""
+### V10.4
+- 📚 Green Bean Explorer Foundation
+- 📥 BP2 Import Planning
+
+### V10.3
+- 👓 Bigger Sidebar Font
+- ✨ UI Improvement
+
+### V10.2
+- 🌱 Coffee Species
+- 🆔 Automatic Bean ID
+
+### V10.1
+- 🚀 Initial Green Bean Module
+""")
+
 st.divider()
 
 st.subheader("Welcome")
