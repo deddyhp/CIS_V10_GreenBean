@@ -11,20 +11,10 @@ st.caption("Version V10.1")
 
 st.divider()
 
-st.subheader("🏠 Home")
-
 st.write("""
 Selamat datang di **Coffee Intelligent System (CIS)**.
 
-Gunakan menu di sidebar untuk membuka setiap modul.
-
-Saat ini modul yang aktif adalah:
-
-- 🌱 Green Bean Database
+Silakan pilih modul pada sidebar di sebelah kiri.
 """)
 
-st.divider()
-
-st.success("✅ System Ready")
-
-st.caption("© 2026 Pagerwatu Coffee")
+st.info("👈 Gunakan menu di kiri untuk membuka Green Bean Database.")
