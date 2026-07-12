@@ -1,6 +1,5 @@
 import streamlit as st
 from utils.database import create_database, add_greenbean
-import os
 
 st.set_page_config(
     page_title="Green Bean Database",
