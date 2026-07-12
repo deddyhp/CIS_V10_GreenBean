@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.database import create_database, add_greenbean
+import utils.database as db
 
 st.set_page_config(
     page_title="Green Bean Database",
@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide"
 )
 
-create_database()
+db.create_database()
 
 st.title("🌱 Green Bean Database")
 
@@ -79,7 +79,7 @@ notes = st.text_area("Notes")
 
 if st.button("💾 Save Green Bean"):
 
-    add_greenbean(
+    db.add_greenbean(
         bean_name,
         origin,
         region,
