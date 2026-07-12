@@ -138,6 +138,7 @@ def add_greenbean(
         INSERT INTO greenbean (
             bean_id,
             bean_name,
+            species,
             origin,
             region,
             supplier,
@@ -152,6 +153,7 @@ def add_greenbean(
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         bean_name,
+        species,
         origin,
         region,
         supplier,
