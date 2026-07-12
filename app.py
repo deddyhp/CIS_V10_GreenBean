@@ -11,10 +11,21 @@ st.caption("Version V10.1")
 
 st.divider()
 
-st.write("""
+st.markdown("""
 Selamat datang di **Coffee Intelligent System (CIS)**.
 
-Silakan pilih modul pada sidebar di sebelah kiri.
+Silakan pilih modul melalui **sidebar** di sebelah kiri.
+
+### Current Modules
+- 🌱 Green Bean Database
+- 🔥 Roast Profile *(Coming Soon)*
+- ☕ Blend Database *(Coming Soon)*
+- 📦 Inventory *(Coming Soon)*
+- 📈 Analytics *(Coming Soon)*
 """)
 
-st.info("👈 Gunakan menu di kiri untuk membuka Green Bean Database.")
+st.info("👈 Gunakan menu di kiri untuk membuka modul.")
+
+st.divider()
+
+st.caption("© 2026 Pagerwatu Brew & Roastery")
