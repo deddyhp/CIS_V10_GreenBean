@@ -1,85 +1,30 @@
-
 import sqlite3
 import pandas as pd
 
 
-def connect_database(db_path):
-    """
-    Connect to SQLite database
-    """
+# ==========================================
+# DATABASE CONNECTION
+# ==========================================
+
+def connect_database(db_path="greenbean.db"):
     return sqlite3.connect(db_path)
 
 
-def get_tables(db_path):
-    """
-    Return all table names
-    """
-    conn = connect_database(db_path)
-
-    query = """
-    SELECT name
-    FROM sqlite_master
-    WHERE type='table'
-    """
-
-    tables = pd.read_sql(query, conn)
-
-    conn.close()
-
-    return tables
-
-
-def read_table(db_path, table_name):
-    """
-    Read any table into DataFrame
-    """
-    conn = connect_database(db_path)
-
-    df = pd.read_sql(
-        f"SELECT * FROM {table_name}",
-        conn
-    )
-
-    conn.close()
-
-    return df
-
 # ==========================================
-# CREATE CIS DATABASE
+# CREATE DATABASE
 # ==========================================
 
 def create_database(db_path="greenbean.db"):
 
-    conn = sqlite3.connect(db_path)
-
+    conn = connect_database(db_path)
     cursor = conn.cursor()
 
-if species == "Arabica":
-    prefix = "AR"
-elif species == "Robusta":
-    prefix = "RB"
-elif species == "Liberica":
-    prefix = "LB"
-elif species == "Excelsa":
-    prefix = "EX"
-else:
-    prefix = "OT"
-
-cursor.execute(
-    "SELECT COUNT(*) FROM greenbean WHERE species=?",
-    (species,)
-)
-
-count = cursor.fetchone()[0] + 1
-
-bean_id = f"{prefix}-{count:04d}"
-    
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS greenbean (
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-        bean_id TEXT,
+        bean_id TEXT UNIQUE,
 
         bean_name TEXT,
 
@@ -113,8 +58,35 @@ bean_id = f"{prefix}-{count:04d}"
     """)
 
     conn.commit()
+    conn.close()
+
+
+# ==========================================
+# GENERATE BEAN ID
+# ==========================================
+
+def generate_bean_id(species):
+
+    conn = connect_database()
+    cursor = conn.cursor()
+
+    prefix = "AR" if species == "Arabica" else "RB"
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM greenbean WHERE species=?",
+        (species,)
+    )
+
+    total = cursor.fetchone()[0] + 1
 
     conn.close()
+
+    return f"{prefix}{total:04d}"
+
+
+# ==========================================
+# ADD GREEN BEAN
+# ==========================================
 
 def add_greenbean(
     bean_name,
@@ -131,27 +103,15 @@ def add_greenbean(
     notes
 ):
 
-    conn = sqlite3.connect("greenbean.db")
+    conn = connect_database()
     cursor = conn.cursor()
 
+    bean_id = generate_bean_id(species)
+
     cursor.execute("""
-        INSERT INTO greenbean (
-            bean_id,
-            bean_name,
-            species,
-            origin,
-            region,
-            supplier,
-            process,
-            variety,
-            density,
-            moisture,
-            stock,
-            location,
-            notes
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
+    INSERT INTO greenbean (
+
+        bean_id,
         bean_name,
         species,
         origin,
@@ -164,7 +124,81 @@ def add_greenbean(
         stock,
         location,
         notes
+
+    )
+
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+    """, (
+
+        bean_id,
+        bean_name,
+        species,
+        origin,
+        region,
+        supplier,
+        process,
+        variety,
+        density,
+        moisture,
+        stock,
+        location,
+        notes
+
     ))
 
     conn.commit()
     conn.close()
+
+
+# ==========================================
+# READ DATABASE
+# ==========================================
+
+def get_all_greenbean():
+
+    conn = connect_database()
+
+    df = pd.read_sql(
+        "SELECT * FROM greenbean ORDER BY bean_name",
+        conn
+    )
+
+    conn.close()
+
+    return df
+
+
+# ==========================================
+# SEARCH
+# ==========================================
+
+def search_greenbean(keyword):
+
+    conn = connect_database()
+
+    query = """
+    SELECT *
+    FROM greenbean
+    WHERE
+        bean_name LIKE ?
+        OR origin LIKE ?
+        OR species LIKE ?
+        OR process LIKE ?
+    ORDER BY bean_name
+    """
+
+    df = pd.read_sql(
+        query,
+        conn,
+        params=(
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%"
+        )
+    )
+
+    conn.close()
+
+    return df
