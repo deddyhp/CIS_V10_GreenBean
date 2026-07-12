@@ -11,7 +11,7 @@ db.create_database()
 
 st.title("🌱 Green Bean Database")
 
-st.subheader("🆕 Green Bean History")
+st.subheader("🆕 Version History")
 
 st.markdown("""
 ### V10.4
