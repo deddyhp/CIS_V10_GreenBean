@@ -91,3 +91,52 @@ def create_database(db_path="greenbean.db"):
     conn.commit()
 
     conn.close()
+
+def add_greenbean(
+    bean_name,
+    origin,
+    region,
+    supplier,
+    process,
+    variety,
+    density,
+    moisture,
+    stock,
+    location,
+    notes
+):
+
+    conn = sqlite3.connect("greenbean.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO greenbean (
+            bean_name,
+            origin,
+            region,
+            supplier,
+            process,
+            variety,
+            density,
+            moisture,
+            stock,
+            location,
+            notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        bean_name,
+        origin,
+        region,
+        supplier,
+        process,
+        variety,
+        density,
+        moisture,
+        stock,
+        location,
+        notes
+    ))
+
+    conn.commit()
+    conn.close()
