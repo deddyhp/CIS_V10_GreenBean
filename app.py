@@ -28,15 +28,7 @@ st.set_page_config(
 )
 
 st.title("☕ Coffee Intelligent System")
-st.caption("Version V10.3")
-
-st.subheader("🆕 What's New V10.3")
-
-st.markdown("""
-- 🌱 Coffee Species
-- 🆔 Automatic Bean ID
-- 👓 Bigger Sidebar Font
-""")
+st.caption("Version V10.4")
 
 st.divider()
 
