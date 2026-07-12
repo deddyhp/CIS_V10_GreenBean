@@ -33,6 +33,17 @@ st.subheader("🌱 Add Green Bean")
 
 bean_name = st.text_input("Bean Name")
 
+species = st.selectbox(
+    "Coffee Species",
+    [
+        "Arabica",
+        "Robusta",
+        "Liberica",
+        "Excelsa",
+        "Other"
+    ]
+)
+
 origin = st.text_input("Origin")
 
 region = st.text_input("Region")
@@ -81,6 +92,7 @@ if st.button("💾 Save Green Bean"):
 
     db.add_greenbean(
         bean_name,
+        species,
         origin,
         region,
         supplier,
