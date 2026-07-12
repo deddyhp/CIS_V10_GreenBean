@@ -54,6 +54,26 @@ def create_database(db_path="greenbean.db"):
 
     cursor = conn.cursor()
 
+if species == "Arabica":
+    prefix = "AR"
+elif species == "Robusta":
+    prefix = "RB"
+elif species == "Liberica":
+    prefix = "LB"
+elif species == "Excelsa":
+    prefix = "EX"
+else:
+    prefix = "OT"
+
+cursor.execute(
+    "SELECT COUNT(*) FROM greenbean WHERE species=?",
+    (species,)
+)
+
+count = cursor.fetchone()[0] + 1
+
+bean_id = f"{prefix}-{count:04d}"
+    
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS greenbean (
 
