@@ -51,7 +51,8 @@ def generate_bean_id(species):
 def add_greenbean(bean_name,species,origin,region,supplier,process,variety,density,moisture,stock,location,notes):
     conn = connect_database()
     cur = conn.cursor()
-    bean_id = generate_bean_id(species)
+    # bean_id = generate_bean_id(species)
+    bean_id = "TEST0001"
     cur.execute("""
     INSERT INTO greenbean(
     bean_id,bean_name,species,origin,region,supplier,process,variety,density,moisture,stock,location,notes)
