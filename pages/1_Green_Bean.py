@@ -125,9 +125,38 @@ if st.button("💾 Save Green Bean"):
     )
 
     st.success("✅ Green Bean berhasil disimpan.")
-    
-st.info("🚧 Database akan dibangun pada langkah berikutnya.")
 
 st.divider()
 
-st.caption("Coffee Intelligent System • V10.1")
+st.subheader("📥 BP2 Import")
+
+st.info("""
+🚧 Coming Soon
+
+Import Green Bean dari file BP2.
+
+Fitur ini akan:
+- Menambah bean baru
+- Update stock
+- Update purchase price
+- Update remark
+""")
+
+st.divider()
+
+st.subheader("📚 Green Bean Explorer")
+
+st.info("""
+🚧 Coming Soon
+
+Fitur ini akan menyediakan:
+- Green Bean Database
+- Search
+- Bean Detail
+- Edit Data
+- Archive Bean
+""")
+
+st.divider()
+
+st.caption("Coffee Intelligent System • V10.4")
