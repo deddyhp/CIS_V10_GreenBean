@@ -10,13 +10,6 @@ st.set_page_config(
 
 create_database()
 
-import os
-
-if os.path.exists("greenbean.db"):
-    st.success("✅ CIS Database Ready")
-else:
-    st.error("❌ Database belum dibuat")
-
 st.title("🌱 Green Bean Database")
 
 st.divider()
@@ -37,55 +30,71 @@ st.success("✅ Green Bean Module Active")
 
 st.divider()
 
-st.subheader("➕ Add Green Bean")
+st.subheader("🌱 Add Green Bean")
 
 bean_name = st.text_input("Bean Name")
+
 origin = st.text_input("Origin")
-process = st.text_input("Process")
+
+region = st.text_input("Region")
+
+supplier = st.text_input("Supplier")
+
+process = st.selectbox(
+    "Process",
+    [
+        "Washed",
+        "Natural",
+        "Honey",
+        "Wet Hulled",
+        "Anaerobic",
+        "Carbonic Maceration",
+        "Other"
+    ]
+)
+
+variety = st.text_input("Variety")
 
 density = st.number_input(
     "Density (g/L)",
     min_value=0.0,
-    value=700.0,
-    step=0.1
+    value=700.0
 )
 
 moisture = st.number_input(
     "Moisture (%)",
     min_value=0.0,
-    value=11.0,
-    step=0.1
+    max_value=20.0,
+    value=11.0
 )
 
-altitude = st.number_input(
-    "Altitude (masl)",
-    min_value=0,
-    value=1200,
-    step=50
+stock = st.number_input(
+    "Stock (kg)",
+    min_value=0.0,
+    value=60.0
 )
 
-roast_level = st.selectbox(
-    "Recommended Roast",
-    [
-        "Light",
-        "Medium Light",
-        "Medium",
-        "Medium Dark"
-    ]
-)
+location = st.text_input("Storage Location")
+
+notes = st.text_area("Notes")
 
 if st.button("💾 Save Green Bean"):
+
     add_greenbean(
         bean_name,
         origin,
+        region,
+        supplier,
         process,
+        variety,
         density,
         moisture,
-        altitude,
-        roast_level
+        stock,
+        location,
+        notes
     )
 
-    st.success("Green Bean berhasil disimpan.")
+    st.success("✅ Green Bean berhasil disimpan.")
     
 st.info("🚧 Database akan dibangun pada langkah berikutnya.")
 
