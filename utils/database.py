@@ -59,7 +59,11 @@ def create_database(db_path="greenbean.db"):
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
+        bean_id TEXT,
+
         bean_name TEXT,
+
+        species TEXT,
 
         origin TEXT,
 
@@ -94,6 +98,7 @@ def create_database(db_path="greenbean.db"):
 
 def add_greenbean(
     bean_name,
+    species,
     origin,
     region,
     supplier,
@@ -111,6 +116,7 @@ def add_greenbean(
 
     cursor.execute("""
         INSERT INTO greenbean (
+            bean_id,
             bean_name,
             origin,
             region,
@@ -123,7 +129,7 @@ def add_greenbean(
             location,
             notes
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         bean_name,
         origin,
