@@ -9,6 +9,13 @@ st.set_page_config(
 
 create_database()
 
+import os
+
+if os.path.exists("greenbean.db"):
+    st.success("✅ CIS Database Ready")
+else:
+    st.error("❌ Database belum dibuat")
+
 st.title("🌱 Green Bean Database")
 
 st.divider()
