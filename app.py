@@ -1,55 +1,30 @@
 import streamlit as st
 
-# ==========================================
-# PAGE CONFIG
-# ==========================================
 st.set_page_config(
     page_title="Coffee Intelligent System",
     page_icon="☕",
     layout="wide"
 )
 
-# ==========================================
-# HEADER
-# ==========================================
 st.title("☕ Coffee Intelligent System")
-st.caption("Green Bean Database • Version V10.1")
+st.caption("Version V10.1")
 
 st.divider()
 
-# ==========================================
-# WELCOME
-# ==========================================
-st.subheader("Welcome")
+st.subheader("🏠 Home")
 
-st.write(
-    """
+st.write("""
 Selamat datang di **Coffee Intelligent System (CIS)**.
 
-Project ini dibangun untuk menjadi pusat seluruh aktivitas kopi Pagerwatu.
+Gunakan menu di sidebar untuk membuka setiap modul.
 
-Silakan mulai dari **Green Bean Database**.
-"""
-)
+Saat ini modul yang aktif adalah:
 
-st.divider()
-
-# ==========================================
-# MODULE STATUS
-# ==========================================
-st.subheader("Current Modules")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.success("🌱 Green Bean Database")
-
-with col2:
-    st.info("🔥 Roast Profile (Coming Soon)")
+- 🌱 Green Bean Database
+""")
 
 st.divider()
 
-# ==========================================
-# FOOTER
-# ==========================================
+st.success("✅ System Ready")
+
 st.caption("© 2026 Pagerwatu Coffee")
