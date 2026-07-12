@@ -1,18 +1,69 @@
 import streamlit as st
 import utils.database as db
 
-st.set_page_config(page_title="Green Bean", page_icon="🌱", layout="wide")
+st.set_page_config(page_title="Home", page_icon="🏠", layout="wide")
 
 db.create_database()
 
+# ---------- Custom CSS ----------
+st.markdown("""
+<style>
+/* Hide default Streamlit multipage navigation so we can use a cleaner custom sidebar */
+div[data-testid="stSidebarNav"] {
+    display: none;
+}
+
+/* Sidebar menu styling */
+section[data-testid="stSidebar"] .sidebar-home-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+section[data-testid="stSidebar"] .sidebar-home-box {
+    font-size: 22px;
+    font-weight: 700;
+    background: #F3F5F9;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    border-left: 5px solid #5E9D64;
+}
+
+section[data-testid="stSidebar"] .sidebar-caption {
+    font-size: 14px;
+    color: #666666;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------- Custom Sidebar ----------
+with st.sidebar:
+    st.markdown('<div class="sidebar-home-title">🏠 Menu</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-home-box">🌱 Home</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="sidebar-caption">Green Bean Database is now under the Home menu. '
+        'Ready to be combined with future CIS features.</div>',
+        unsafe_allow_html=True,
+    )
+
+# ---------- Main Page ----------
 st.title("🌱 Green Bean Database")
-st.caption("Coffee Intelligent System • V10.6")
+st.caption("Coffee Intelligent System • V10.7")
 
 st.divider()
 
 st.subheader("🆕 Version History")
 
 st.markdown("""
+### V10.7
+- 🏠 Sidebar Home Menu
+- 🔠 Sidebar Menu Font 22
+- ✨ Cleaner Navigation Identity
+
 ### V10.6
 - 📦 Simple Inventory View
 - 👆 Open Bean Properties from Stock List
