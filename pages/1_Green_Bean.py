@@ -1,3 +1,4 @@
+from utils.database import create_database
 import streamlit as st
 
 st.set_page_config(
@@ -5,6 +6,8 @@ st.set_page_config(
     page_icon="🌱",
     layout="wide"
 )
+
+create_database()
 
 st.title("🌱 Green Bean Database")
 
