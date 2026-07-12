@@ -43,3 +43,51 @@ def read_table(db_path, table_name):
     conn.close()
 
     return df
+
+# ==========================================
+# CREATE CIS DATABASE
+# ==========================================
+
+def create_database(db_path="greenbean.db"):
+
+    conn = sqlite3.connect(db_path)
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS greenbean (
+
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        bean_name TEXT,
+
+        origin TEXT,
+
+        region TEXT,
+
+        supplier TEXT,
+
+        process TEXT,
+
+        variety TEXT,
+
+        density REAL,
+
+        moisture REAL,
+
+        stock REAL,
+
+        location TEXT,
+
+        notes TEXT,
+
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+    )
+    """)
+
+    conn.commit()
+
+    conn.close()
