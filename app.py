@@ -1,5 +1,26 @@
 import streamlit as st
 
+st.markdown("""
+<style>
+
+/* Sidebar */
+
+section[data-testid="stSidebar"] *{
+    font-size: 22px !important;
+}
+
+/* Judul halaman sidebar */
+
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3{
+    font-size: 28px !important;
+    font-weight: bold;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(
     page_title="Coffee Intelligent System",
     page_icon="☕",
@@ -8,6 +29,14 @@ st.set_page_config(
 
 st.title("☕ Coffee Intelligent System")
 st.caption("Version V10.2")
+
+st.subheader("🆕 What's New V10.3")
+
+st.markdown("""
+- 🌱 Coffee Species
+- 🆔 Automatic Bean ID
+- 👓 Bigger Sidebar Font
+""")
 
 st.divider()
 
