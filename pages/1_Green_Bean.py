@@ -21,12 +21,17 @@ except Exception as exc:
     st.stop()
 
 st.title("🌱 Green Bean Database")
-st.caption("Coffee Intelligent System • V10.8")
+st.caption("Coffee Intelligent System • V10.9")
 
 st.divider()
 
 st.subheader("🆕 Version History")
 st.markdown("""
+### V10.9
+- 💰 Acquisition Price per kg
+- 📊 Remaining Stock Value
+- 🔄 Backward Compatible with V10.8 Data
+
 ### V10.8
 - ☁️ Google Sheets Cloud Database
 - ✏️ Edit Bean Properties
@@ -67,6 +72,12 @@ with st.expander("➕ Add New Green Bean"):
             process = st.text_input("Process")
             density = st.number_input("Density (g/L)", min_value=0.0, step=0.1)
             stock = st.number_input("Initial Stock (kg)", min_value=0.0, step=0.1)
+            acquisition_price_per_kg = st.number_input(
+                "Acquisition Price / kg (Rp)",
+                min_value=0.0,
+                step=1000.0,
+                format="%.0f",
+            )
 
         notes = st.text_area("Notes")
         save_new = st.form_submit_button("💾 Save Green Bean", type="primary")
@@ -79,7 +90,8 @@ with st.expander("➕ Add New Green Bean"):
                     bean_id = db.add_greenbean(
                         bean_name.strip(), species, origin.strip(), region.strip(),
                         supplier.strip(), process.strip(), variety.strip(), density,
-                        moisture, stock, location.strip(), notes.strip(),
+                        moisture, stock, acquisition_price_per_kg,
+                        location.strip(), notes.strip(),
                     )
                     st.success(f"✅ Green Bean {bean_id} berhasil disimpan ke Google Sheets.")
                     st.rerun()
@@ -104,10 +116,16 @@ if df.empty:
     st.info("Belum ada Green Bean yang ditemukan di Google Sheets.")
 else:
     stock_display = df[[
-        "bean_id", "bean_name", "species", "origin", "process", "stock", "location"
+        "bean_id", "bean_name", "species", "origin", "process",
+        "stock", "acquisition_price_per_kg", "location"
     ]].copy()
+    stock_display["stock_value"] = (
+        stock_display["stock"].astype(float)
+        * stock_display["acquisition_price_per_kg"].astype(float)
+    )
     stock_display.columns = [
-        "Bean ID", "Bean Name", "Species", "Origin", "Process", "Stock (kg)", "Location"
+        "Bean ID", "Bean Name", "Species", "Origin", "Process",
+        "Stock (kg)", "Acquisition Price / kg (Rp)", "Stock Value (Rp)", "Location"
     ]
     st.dataframe(stock_display, use_container_width=True, hide_index=True)
 
@@ -132,10 +150,19 @@ else:
             st.subheader(f"🌱 {bean['bean_name']}")
             st.caption(f"Bean ID: {bean['bean_id']}")
 
-            metric1, metric2, metric3 = st.columns(3)
+            stock_value = (
+                float(bean.get("stock") or 0)
+                * float(bean.get("acquisition_price_per_kg") or 0)
+            )
+
+            metric1, metric2, metric3, metric4 = st.columns(4)
             metric1.metric("Remaining Stock", f"{float(bean['stock'] or 0):.2f} kg")
-            metric2.metric("Species", bean.get("species") or "-")
-            metric3.metric("Process", bean.get("process") or "-")
+            metric2.metric(
+                "Acquisition Price / kg",
+                f"Rp {float(bean.get('acquisition_price_per_kg') or 0):,.0f}",
+            )
+            metric3.metric("Remaining Stock Value", f"Rp {stock_value:,.0f}")
+            metric4.metric("Species", bean.get("species") or "-")
 
             info_tab, edit_tab, stock_tab = st.tabs([
                 "📋 Properties",
@@ -154,6 +181,10 @@ else:
                     st.markdown(f"**Density:** {float(bean.get('density') or 0):.1f} g/L")
                     st.markdown(f"**Moisture:** {float(bean.get('moisture') or 0):.1f}%")
                     st.markdown(f"**Storage Location:** {bean.get('location') or '-'}")
+                    st.markdown(
+                        f"**Acquisition Price / kg:** "
+                        f"Rp {float(bean.get('acquisition_price_per_kg') or 0):,.0f}"
+                    )
                     st.markdown(f"**Created:** {bean.get('created_at') or '-'}")
                     st.markdown(f"**Last Updated:** {bean.get('updated_at') or '-'}")
 
@@ -201,6 +232,13 @@ else:
                             value=float(bean.get("density") or 0),
                             step=0.1,
                         )
+                        edit_acquisition_price_per_kg = st.number_input(
+                            "Acquisition Price / kg (Rp)",
+                            min_value=0.0,
+                            value=float(bean.get("acquisition_price_per_kg") or 0),
+                            step=1000.0,
+                            format="%.0f",
+                        )
 
                     edit_notes = st.text_area("Notes", value=str(bean.get("notes") or ""))
                     save_properties = st.form_submit_button("💾 Save Properties", type="primary")
@@ -221,6 +259,7 @@ else:
                                     edit_variety.strip(),
                                     edit_density,
                                     edit_moisture,
+                                    edit_acquisition_price_per_kg,
                                     edit_location.strip(),
                                     edit_notes.strip(),
                                 )
