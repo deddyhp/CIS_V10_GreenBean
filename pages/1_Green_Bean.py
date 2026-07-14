@@ -3,10 +3,7 @@ import utils.database as db
 
 st.set_page_config(page_title="Green Bean", page_icon="🌱", layout="wide")
 
-db.create_database()
-
-# Minor UI tweak only: keep default Streamlit sidebar/app navigation,
-# just make sidebar menu font bigger.
+# Keep the default Streamlit multipage navigation and enlarge its font only.
 st.markdown("""
 <style>
 div[data-testid="stSidebarNav"] a,
@@ -17,14 +14,25 @@ div[data-testid="stSidebarNav"] p {
 </style>
 """, unsafe_allow_html=True)
 
+try:
+    db.create_database()
+except Exception as exc:
+    st.error(f"Koneksi Google Sheets belum siap: {exc}")
+    st.stop()
+
 st.title("🌱 Green Bean Database")
-st.caption("Coffee Intelligent System • V10.7")
+st.caption("Coffee Intelligent System • V10.8")
 
 st.divider()
 
 st.subheader("🆕 Version History")
-
 st.markdown("""
+### V10.8
+- ☁️ Google Sheets Cloud Database
+- ✏️ Edit Bean Properties
+- 🧾 Stock Adjustment Remark
+- 🕘 Update History Information
+
 ### V10.7
 - 👓 Bigger Sidebar Menu Font
 - ✅ Keep Default App Navigation
@@ -34,25 +42,6 @@ st.markdown("""
 - 📦 Simple Inventory View
 - 👆 Open Bean Properties from Stock List
 - ⚖️ Update Remaining Stock
-
-### V10.5
-- 🔍 Green Bean Explorer
-- 📋 Search Database
-- 📊 Total Bean Counter
-
-### V10.4
-- 📚 Green Bean Explorer Foundation
-- 📥 BP2 Import Planning
-
-### V10.3
-- 👓 Bigger Sidebar Font
-
-### V10.2
-- 🌱 Coffee Species
-- 🆔 Automatic Bean ID
-
-### V10.1
-- 🚀 Initial Green Bean Module
 """)
 
 st.divider()
@@ -60,10 +49,9 @@ st.divider()
 with st.expander("➕ Add New Green Bean"):
     with st.form("add_greenbean_form", clear_on_submit=True):
         bean_name = st.text_input("Bean Name")
-
         species = st.selectbox(
             "Coffee Species",
-            ["Arabica", "Robusta", "Liberica", "Excelsa", "Other"]
+            ["Arabica", "Robusta", "Liberica", "Excelsa", "Other"],
         )
 
         col1, col2 = st.columns(2)
@@ -81,7 +69,6 @@ with st.expander("➕ Add New Green Bean"):
             stock = st.number_input("Initial Stock (kg)", min_value=0.0, step=0.1)
 
         notes = st.text_area("Notes")
-
         save_new = st.form_submit_button("💾 Save Green Bean", type="primary")
 
         if save_new:
@@ -92,30 +79,33 @@ with st.expander("➕ Add New Green Bean"):
                     bean_id = db.add_greenbean(
                         bean_name.strip(), species, origin.strip(), region.strip(),
                         supplier.strip(), process.strip(), variety.strip(), density,
-                        moisture, stock, location.strip(), notes.strip()
+                        moisture, stock, location.strip(), notes.strip(),
                     )
-                    st.success(f"✅ Green Bean {bean_id} berhasil disimpan.")
+                    st.success(f"✅ Green Bean {bean_id} berhasil disimpan ke Google Sheets.")
+                    st.rerun()
                 except Exception as exc:
                     st.error(f"Green Bean gagal disimpan: {exc}")
 
 st.divider()
-
 st.subheader("📦 Green Bean Inventory")
 
 keyword = st.text_input(
     "Search",
-    placeholder="Bean / Origin / Species / Process / Bean ID"
+    placeholder="Bean / Origin / Species / Process / Bean ID",
 )
 
-if keyword.strip():
-    df = db.search_greenbean(keyword.strip())
-else:
-    df = db.get_all_greenbean()
+try:
+    df = db.search_greenbean(keyword.strip()) if keyword.strip() else db.get_all_greenbean()
+except Exception as exc:
+    st.error(f"Database gagal dibaca: {exc}")
+    st.stop()
 
 if df.empty:
-    st.info("Belum ada Green Bean yang ditemukan.")
+    st.info("Belum ada Green Bean yang ditemukan di Google Sheets.")
 else:
-    stock_display = df[["bean_id", "bean_name", "species", "origin", "process", "stock", "location"]].copy()
+    stock_display = df[[
+        "bean_id", "bean_name", "species", "origin", "process", "stock", "location"
+    ]].copy()
     stock_display.columns = [
         "Bean ID", "Bean Name", "Species", "Origin", "Process", "Stock (kg)", "Location"
     ]
@@ -130,7 +120,7 @@ else:
         "Pilih bean untuk membuka properties",
         options=list(bean_options.keys()),
         index=None,
-        placeholder="Klik lalu pilih salah satu bean"
+        placeholder="Klik lalu pilih salah satu bean",
     )
 
     if selected_label:
@@ -144,42 +134,129 @@ else:
 
             metric1, metric2, metric3 = st.columns(3)
             metric1.metric("Remaining Stock", f"{float(bean['stock'] or 0):.2f} kg")
-            metric2.metric("Species", bean['species'] or "-")
-            metric3.metric("Process", bean['process'] or "-")
+            metric2.metric("Species", bean.get("species") or "-")
+            metric3.metric("Process", bean.get("process") or "-")
 
-            left, right = st.columns(2)
-            with left:
-                st.markdown(f"**Origin:** {bean['origin'] or '-'}")
-                st.markdown(f"**Region:** {bean['region'] or '-'}")
-                st.markdown(f"**Supplier:** {bean['supplier'] or '-'}")
-                st.markdown(f"**Variety:** {bean['variety'] or '-'}")
-            with right:
-                density_text = f"{float(bean['density']):.1f} g/L" if bean['density'] is not None else "-"
-                moisture_text = f"{float(bean['moisture']):.1f}%" if bean['moisture'] is not None else "-"
-                st.markdown(f"**Density:** {density_text}")
-                st.markdown(f"**Moisture:** {moisture_text}")
-                st.markdown(f"**Storage Location:** {bean['location'] or '-'}")
-                st.markdown(f"**Last Updated:** {bean['updated_at'] or '-'}")
+            info_tab, edit_tab, stock_tab = st.tabs([
+                "📋 Properties",
+                "✏️ Edit Properties",
+                "⚖️ Stock Adjustment",
+            ])
 
-            st.markdown("**Notes**")
-            st.info(bean['notes'] or "Tidak ada catatan.")
+            with info_tab:
+                left, right = st.columns(2)
+                with left:
+                    st.markdown(f"**Origin:** {bean.get('origin') or '-'}")
+                    st.markdown(f"**Region:** {bean.get('region') or '-'}")
+                    st.markdown(f"**Supplier:** {bean.get('supplier') or '-'}")
+                    st.markdown(f"**Variety:** {bean.get('variety') or '-'}")
+                with right:
+                    st.markdown(f"**Density:** {float(bean.get('density') or 0):.1f} g/L")
+                    st.markdown(f"**Moisture:** {float(bean.get('moisture') or 0):.1f}%")
+                    st.markdown(f"**Storage Location:** {bean.get('location') or '-'}")
+                    st.markdown(f"**Created:** {bean.get('created_at') or '-'}")
+                    st.markdown(f"**Last Updated:** {bean.get('updated_at') or '-'}")
 
-            with st.form(f"stock_form_{selected_bean_id}"):
-                new_stock = st.number_input(
-                    "Update Remaining Stock (kg)",
-                    min_value=0.0,
-                    value=float(bean['stock'] or 0),
-                    step=0.1,
-                    format="%.2f"
+                st.markdown("**Notes**")
+                st.info(bean.get("notes") or "Tidak ada catatan.")
+
+                st.markdown("#### 🕘 Last Stock Update")
+                history1, history2, history3 = st.columns(3)
+                history1.metric(
+                    "Previous Stock",
+                    f"{float(bean.get('last_stock_before') or 0):.2f} kg",
                 )
-                save_stock = st.form_submit_button("💾 Save Stock", type="primary")
+                history2.metric("Remark", bean.get("last_stock_remark") or "-")
+                history3.metric("Updated At", bean.get("last_stock_updated_at") or "-")
 
-                if save_stock:
-                    try:
-                        db.update_greenbean_stock(selected_bean_id, new_stock)
-                        st.success(f"✅ Stock {selected_bean_id} diperbarui menjadi {new_stock:.2f} kg.")
-                        st.rerun()
-                    except Exception as exc:
-                        st.error(f"Stock gagal diperbarui: {exc}")
+            with edit_tab:
+                with st.form(f"edit_properties_{selected_bean_id}"):
+                    edit_name = st.text_input("Bean Name", value=str(bean.get("bean_name") or ""))
+                    species_options = ["Arabica", "Robusta", "Liberica", "Excelsa", "Other"]
+                    current_species = bean.get("species") or "Other"
+                    species_index = species_options.index(current_species) if current_species in species_options else 4
+                    edit_species = st.selectbox("Coffee Species", species_options, index=species_index)
+
+                    e1, e2 = st.columns(2)
+                    with e1:
+                        edit_origin = st.text_input("Origin", value=str(bean.get("origin") or ""))
+                        edit_supplier = st.text_input("Supplier", value=str(bean.get("supplier") or ""))
+                        edit_variety = st.text_input("Variety", value=str(bean.get("variety") or ""))
+                        edit_moisture = st.number_input(
+                            "Moisture (%)",
+                            min_value=0.0,
+                            value=float(bean.get("moisture") or 0),
+                            step=0.1,
+                        )
+                        edit_location = st.text_input(
+                            "Storage Location",
+                            value=str(bean.get("location") or ""),
+                        )
+                    with e2:
+                        edit_region = st.text_input("Region", value=str(bean.get("region") or ""))
+                        edit_process = st.text_input("Process", value=str(bean.get("process") or ""))
+                        edit_density = st.number_input(
+                            "Density (g/L)",
+                            min_value=0.0,
+                            value=float(bean.get("density") or 0),
+                            step=0.1,
+                        )
+
+                    edit_notes = st.text_area("Notes", value=str(bean.get("notes") or ""))
+                    save_properties = st.form_submit_button("💾 Save Properties", type="primary")
+
+                    if save_properties:
+                        if not edit_name.strip():
+                            st.error("Bean Name wajib diisi.")
+                        else:
+                            try:
+                                db.update_greenbean_properties(
+                                    selected_bean_id,
+                                    edit_name.strip(),
+                                    edit_species,
+                                    edit_origin.strip(),
+                                    edit_region.strip(),
+                                    edit_supplier.strip(),
+                                    edit_process.strip(),
+                                    edit_variety.strip(),
+                                    edit_density,
+                                    edit_moisture,
+                                    edit_location.strip(),
+                                    edit_notes.strip(),
+                                )
+                                st.success("✅ Bean properties berhasil diperbarui.")
+                                st.rerun()
+                            except Exception as exc:
+                                st.error(f"Properties gagal diperbarui: {exc}")
+
+            with stock_tab:
+                with st.form(f"stock_form_{selected_bean_id}"):
+                    new_stock = st.number_input(
+                        "New Remaining Stock (kg)",
+                        min_value=0.0,
+                        value=float(bean.get("stock") or 0),
+                        step=0.1,
+                        format="%.2f",
+                    )
+                    stock_reason = st.selectbox(
+                        "Adjustment Reason",
+                        ["Roasting", "Purchase", "Sample", "Waste", "Stock Correction", "Other"],
+                    )
+                    stock_note = st.text_input(
+                        "Remark",
+                        placeholder="Contoh: Roast batch 500 g atau koreksi hasil timbang",
+                    )
+                    save_stock = st.form_submit_button("💾 Save Stock Adjustment", type="primary")
+
+                    if save_stock:
+                        final_remark = stock_reason if not stock_note.strip() else f"{stock_reason} — {stock_note.strip()}"
+                        try:
+                            db.update_greenbean_stock(selected_bean_id, new_stock, final_remark)
+                            st.success(
+                                f"✅ Stock {selected_bean_id} diperbarui menjadi {new_stock:.2f} kg."
+                            )
+                            st.rerun()
+                        except Exception as exc:
+                            st.error(f"Stock gagal diperbarui: {exc}")
 
 st.caption(f"Total Bean: {len(df)}")
