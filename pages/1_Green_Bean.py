@@ -130,6 +130,13 @@ else:
         stock_display["stock"].astype(float)
         * stock_display["acquisition_price_per_kg"].astype(float)
     )
+
+    # Put calculated stock value before location so displayed headers
+    # always match the underlying data columns.
+    stock_display = stock_display[[
+        "bean_id", "bean_name", "species", "origin", "process",
+        "stock", "acquisition_price_per_kg", "stock_value", "location"
+    ]]
     stock_display.columns = [
         "Bean ID", "Bean Name", "Species", "Origin", "Process",
         "Stock (kg)", "Acquisition Price / kg (Rp)", "Stock Value (Rp)", "Location"
