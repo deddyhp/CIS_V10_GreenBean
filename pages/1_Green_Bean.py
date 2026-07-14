@@ -1,3 +1,4 @@
+import inspect
 import streamlit as st
 import utils.database as db
 
@@ -262,22 +263,59 @@ else:
                             st.error("Bean Name wajib diisi.")
                         else:
                             try:
-                                db.update_greenbean_properties(
-                                    selected_bean_id,
-                                    edit_name.strip(),
-                                    edit_species,
-                                    edit_origin.strip(),
-                                    edit_region.strip(),
-                                    edit_supplier.strip(),
-                                    edit_process.strip(),
-                                    edit_variety.strip(),
-                                    edit_density,
-                                    edit_moisture,
-                                    edit_acquisition_price_per_kg,
-                                    edit_location.strip(),
-                                    edit_notes.strip(),
+                                update_signature = inspect.signature(
+                                    db.update_greenbean_properties
                                 )
-                                st.success("✅ Bean properties berhasil diperbarui.")
+                                update_parameter_count = len(update_signature.parameters)
+
+                                if update_parameter_count >= 13:
+                                    # Native V10.9 database function.
+                                    db.update_greenbean_properties(
+                                        selected_bean_id,
+                                        edit_name.strip(),
+                                        edit_species,
+                                        edit_origin.strip(),
+                                        edit_region.strip(),
+                                        edit_supplier.strip(),
+                                        edit_process.strip(),
+                                        edit_variety.strip(),
+                                        edit_density,
+                                        edit_moisture,
+                                        edit_acquisition_price_per_kg,
+                                        edit_location.strip(),
+                                        edit_notes.strip(),
+                                    )
+                                else:
+                                    # Compatibility mode for a Streamlit runtime
+                                    # that still exposes the V10.8 12-argument function.
+                                    db.update_greenbean_properties(
+                                        selected_bean_id,
+                                        edit_name.strip(),
+                                        edit_species,
+                                        edit_origin.strip(),
+                                        edit_region.strip(),
+                                        edit_supplier.strip(),
+                                        edit_process.strip(),
+                                        edit_variety.strip(),
+                                        edit_density,
+                                        edit_moisture,
+                                        edit_location.strip(),
+                                        edit_notes.strip(),
+                                    )
+
+                                    row_number = db._find_row_number(selected_bean_id)
+                                    if row_number is None:
+                                        raise ValueError(
+                                            f"Bean ID {selected_bean_id} tidak ditemukan."
+                                        )
+                                    worksheet = db._get_worksheet()
+                                    worksheet.update(
+                                        f"S{row_number}",
+                                        [[float(edit_acquisition_price_per_kg)]],
+                                        value_input_option="USER_ENTERED",
+                                    )
+
+                                st.success("✅ Bean properties dan harga berhasil diperbarui.")
                                 st.rerun()
                             except Exception as exc:
                                 st.error(f"Properties gagal diperbarui: {exc}")
