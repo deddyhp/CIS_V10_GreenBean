@@ -28,6 +28,7 @@ HEADERS = [
     "last_stock_before",
     "last_stock_remark",
     "last_stock_updated_at",
+    "acquisition_price_per_kg",
 ]
 
 SCOPES = [
@@ -104,7 +105,13 @@ def _records_dataframe() -> pd.DataFrame:
         if column not in df.columns:
             df[column] = ""
 
-    for column in ["density", "moisture", "stock", "last_stock_before"]:
+    for column in [
+        "density",
+        "moisture",
+        "stock",
+        "last_stock_before",
+        "acquisition_price_per_kg",
+    ]:
         df[column] = pd.to_numeric(df[column], errors="coerce").fillna(0.0)
 
     return df[HEADERS]
@@ -186,6 +193,7 @@ def add_greenbean(
     density: float,
     moisture: float,
     stock: float,
+    acquisition_price_per_kg: float,
     location: str,
     notes: str,
 ) -> str:
@@ -212,6 +220,7 @@ def add_greenbean(
         "",
         "Initial stock",
         now,
+        float(acquisition_price_per_kg),
     ]
     worksheet.append_row([_clean(value) for value in row], value_input_option="USER_ENTERED")
     return bean_id
@@ -248,6 +257,7 @@ def update_greenbean_properties(
     variety: str,
     density: float,
     moisture: float,
+    acquisition_price_per_kg: float,
     location: str,
     notes: str,
 ) -> None:
@@ -279,10 +289,11 @@ def update_greenbean_properties(
         current.get("last_stock_before", ""),
         current.get("last_stock_remark", ""),
         current.get("last_stock_updated_at", ""),
+        float(acquisition_price_per_kg),
     ]
 
     worksheet.update(
-        f"A{row_number}:R{row_number}",
+        f"A{row_number}:S{row_number}",
         [[_clean(value) for value in values]],
         value_input_option="USER_ENTERED",
     )
