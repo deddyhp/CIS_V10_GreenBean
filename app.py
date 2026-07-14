@@ -28,7 +28,7 @@ st.set_page_config(
 )
 
 st.title("☕ Coffee Intelligent System")
-st.caption("Version V10.7")
+st.caption("Version V10.8")
 
 st.divider()
 
