@@ -114,11 +114,26 @@ except Exception as exc:
     st.stop()
 
 # Migration-safe fallback:
-# Older Google Sheets data or a delayed schema refresh may not expose
-# the V10.9 price column immediately. Keep the inventory usable and
-# treat existing beans as Rp0 until their acquisition price is edited.
+# Some runtimes may still expose the V10.8 dataframe schema and drop
+# the V10.9 price column. In that case, read the price directly from
+# the active Google Sheet and merge it back by bean_id.
 if "acquisition_price_per_kg" not in df.columns:
     df["acquisition_price_per_kg"] = 0.0
+    try:
+        worksheet = db._get_worksheet()
+        sheet_records = worksheet.get_all_records(default_blank="")
+        price_map = {
+            str(record.get("bean_id", "")): float(
+                record.get("acquisition_price_per_kg", 0) or 0
+            )
+            for record in sheet_records
+        }
+        df["acquisition_price_per_kg"] = (
+            df["bean_id"].astype(str).map(price_map).fillna(0.0)
+        )
+    except Exception:
+        # Keep Rp0 only when the sheet price cannot be read.
+        pass
 
 if df.empty:
     st.info("Belum ada Green Bean yang ditemukan di Google Sheets.")
