@@ -221,6 +221,16 @@ else:
         bean = db.get_greenbean_by_bean_id(selected_bean_id)
 
         if bean:
+            # Keep V10.9 price available even when get_greenbean_by_bean_id()
+            # is still backed by the older V10.8 dataframe schema.
+            selected_row = df[
+                df["bean_id"].astype(str) == str(selected_bean_id)
+            ]
+            if not selected_row.empty:
+                bean["acquisition_price_per_kg"] = float(
+                    selected_row.iloc[0].get("acquisition_price_per_kg", 0) or 0
+                )
+
             st.divider()
             st.subheader(f"🌱 {bean['bean_name']}")
             st.caption(f"Bean ID: {bean['bean_id']}")
