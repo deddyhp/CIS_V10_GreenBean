@@ -112,6 +112,13 @@ except Exception as exc:
     st.error(f"Database gagal dibaca: {exc}")
     st.stop()
 
+# Migration-safe fallback:
+# Older Google Sheets data or a delayed schema refresh may not expose
+# the V10.9 price column immediately. Keep the inventory usable and
+# treat existing beans as Rp0 until their acquisition price is edited.
+if "acquisition_price_per_kg" not in df.columns:
+    df["acquisition_price_per_kg"] = 0.0
+
 if df.empty:
     st.info("Belum ada Green Bean yang ditemukan di Google Sheets.")
 else:
