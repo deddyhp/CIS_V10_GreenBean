@@ -9,6 +9,8 @@ import pandas as pd
 import streamlit as st
 from google.oauth2.service_account import Credentials
 
+DATABASE_VERSION = "V10.9 FINAL"
+
 HEADERS = [
     "bean_id",
     "bean_name",
