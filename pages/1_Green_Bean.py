@@ -88,13 +88,58 @@ with st.expander("➕ Add New Green Bean"):
                 st.error("Bean Name wajib diisi.")
             else:
                 try:
-                    bean_id = db.add_greenbean(
-                        bean_name.strip(), species, origin.strip(), region.strip(),
-                        supplier.strip(), process.strip(), variety.strip(), density,
-                        moisture, stock, acquisition_price_per_kg,
-                        location.strip(), notes.strip(),
+                    add_signature = inspect.signature(db.add_greenbean)
+                    add_parameter_count = len(add_signature.parameters)
+
+                    if add_parameter_count >= 13:
+                        bean_id = db.add_greenbean(
+                            bean_name.strip(),
+                            species,
+                            origin.strip(),
+                            region.strip(),
+                            supplier.strip(),
+                            process.strip(),
+                            variety.strip(),
+                            density,
+                            moisture,
+                            stock,
+                            acquisition_price_per_kg,
+                            location.strip(),
+                            notes.strip(),
+                        )
+                    else:
+                        # Compatibility mode for runtimes still exposing
+                        # the V10.8 12-argument add_greenbean function.
+                        bean_id = db.add_greenbean(
+                            bean_name.strip(),
+                            species,
+                            origin.strip(),
+                            region.strip(),
+                            supplier.strip(),
+                            process.strip(),
+                            variety.strip(),
+                            density,
+                            moisture,
+                            stock,
+                            location.strip(),
+                            notes.strip(),
+                        )
+
+                        row_number = db._find_row_number(bean_id)
+                        if row_number is None:
+                            raise ValueError(
+                                f"Bean ID {bean_id} tidak ditemukan setelah disimpan."
+                            )
+                        worksheet = db._get_worksheet()
+                        worksheet.update(
+                            f"S{row_number}",
+                            [[float(acquisition_price_per_kg)]],
+                            value_input_option="USER_ENTERED",
+                        )
+
+                    st.success(
+                        f"✅ Green Bean {bean_id} dan harga perolehan berhasil disimpan."
                     )
-                    st.success(f"✅ Green Bean {bean_id} berhasil disimpan ke Google Sheets.")
                     st.rerun()
                 except Exception as exc:
                     st.error(f"Green Bean gagal disimpan: {exc}")
