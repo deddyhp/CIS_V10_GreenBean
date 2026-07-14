@@ -82,6 +82,12 @@ def _get_worksheet():
 
 def create_database() -> None:
     worksheet = _get_worksheet()
+
+    # Ensure the Google Sheet grid is wide enough for all schema columns.
+    # V10.8 used 18 columns; V10.9 adds the 19th column (S).
+    if worksheet.col_count < len(HEADERS):
+        worksheet.resize(rows=max(worksheet.row_count, 1000), cols=len(HEADERS))
+
     first_row = worksheet.row_values(1)
 
     if not first_row:
