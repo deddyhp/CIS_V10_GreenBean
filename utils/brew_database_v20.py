@@ -16,26 +16,30 @@ SCOPES = [
 
 SHEET_HEADERS = {
     "Recipe_Master": [
-        "Recipe_ID","Recipe_Name","Brew_Method","Ownership","Purpose","Source",
-        "Version","Status","Created_Date","Last_Update","Favorite","Tags","Bean_Name","Dose_g","Water_g","Ratio","Grind_Setting","Water_Temp_C","Target_Brew_Time","Brewing_Steps"
+        "Recipe_ID", "Recipe_Name", "Brew_Method", "Ownership", "Purpose",
+        "Source", "Version", "Status", "Created_Date", "Last_Update",
+        "Favorite", "Tags", "Bean_Name", "Dose_g", "Water_g", "Ratio",
+        "Grind_Setting", "Water_Temp_C", "Target_Brew_Time", "Brewing_Steps",
     ],
     "Brew_Log": [
-        "Log_ID","Date","Recipe_ID","Bean_Name","Roast_Profile","Dose_g",
-        "Water_g","Ratio","Grind_Setting","Water_Temp_C","Brew_Time",
-        "Result_Score","Aroma","Sweetness","Acidity","Body","Clarity",
-        "Balance","Aftertaste","Overall_Notes"
+        "Log_ID", "Date", "Recipe_ID", "Bean_Name", "Roast_Profile",
+        "Dose_g", "Water_g", "Ratio", "Grind_Setting", "Water_Temp_C",
+        "Brew_Time", "Result_Score", "Aroma", "Sweetness", "Acidity",
+        "Body", "Clarity", "Balance", "Aftertaste", "Overall_Notes",
     ],
     "Knowledge_Notes": [
-        "Knowledge_ID","Recipe_ID","Deddy_Notes","AI_Insight",
-        "Next_Adjustment","Lessons_Learned","Important_Warning","Updated_Date"
+        "Knowledge_ID", "Recipe_ID", "Deddy_Notes", "AI_Insight",
+        "Next_Adjustment", "Lessons_Learned", "Important_Warning",
+        "Updated_Date",
     ],
     "Legacy_Purpose": [
-        "Legacy_ID","Recipe_ID","Personal_Favorite","Family_Favorite",
-        "Commercial_Favorite","Experimental","Reference_Only",
-        "Personal_Notes","Family_Notes","Commercial_Notes"
+        "Legacy_ID", "Recipe_ID", "Personal_Favorite", "Family_Favorite",
+        "Commercial_Favorite", "Experimental", "Reference_Only",
+        "Personal_Notes", "Family_Notes", "Commercial_Notes",
     ],
-    "Settings": ["Category","Value"],
+    "Settings": ["Category", "Value"],
 }
+
 
 def _clean(value: Any) -> Any:
     if value is None:
@@ -44,46 +48,77 @@ def _clean(value: Any) -> Any:
         return ""
     return value
 
+
 @st.cache_resource(show_spinner=False)
 def _get_spreadsheet():
     if "gcp_service_account" not in st.secrets:
         raise RuntimeError("Secret [gcp_service_account] belum tersedia.")
     if "google_sheets" not in st.secrets:
         raise RuntimeError("Secret [google_sheets] belum tersedia.")
+
     gs = st.secrets["google_sheets"]
     if "brewthings_spreadsheet_id" not in gs:
-        raise RuntimeError("Secret google_sheets.brewthings_spreadsheet_id belum tersedia.")
+        raise RuntimeError(
+            "Secret google_sheets.brewthings_spreadsheet_id belum tersedia."
+        )
 
     info = dict(st.secrets["gcp_service_account"])
     credentials = Credentials.from_service_account_info(info, scopes=SCOPES)
     client = gspread.authorize(credentials)
     return client.open_by_key(gs["brewthings_spreadsheet_id"])
 
+
 @st.cache_resource(show_spinner=False)
 def _get_worksheet(sheet_name: str):
     if sheet_name not in SHEET_HEADERS:
         raise ValueError(f"Worksheet tidak dikenal: {sheet_name}")
+
     spreadsheet = _get_spreadsheet()
     try:
         return spreadsheet.worksheet(sheet_name)
     except gspread.WorksheetNotFound:
         headers = SHEET_HEADERS[sheet_name]
         ws = spreadsheet.add_worksheet(
-            title=sheet_name, rows=1000, cols=max(len(headers), 10)
+            title=sheet_name,
+            rows=1000,
+            cols=max(len(headers), 10),
         )
         ws.update("A1", [headers])
         return ws
+
 
 def ensure_database_structure() -> None:
     for sheet_name, expected in SHEET_HEADERS.items():
         ws = _get_worksheet(sheet_name)
         current = ws.row_values(1)
+
         if not current:
             ws.update("A1", [expected])
             continue
-        missing = [h for h in expected if h not in current]
+
+        missing = [header for header in expected if header not in current]
         if missing:
             ws.update("A1", [current + missing])
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def read_sheet(sheet_name: str) -> pd.DataFrame:
+    if sheet_name not in SHEET_HEADERS:
+        raise ValueError(f"Worksheet tidak dikenal: {sheet_name}")
+
+    ws = _get_worksheet(sheet_name)
+    records = ws.get_all_records(default_blank="")
+
+    if not records:
+        return pd.DataFrame(columns=SHEET_HEADERS[sheet_name])
+
+    df = pd.DataFrame(records)
+    for column in SHEET_HEADERS[sheet_name]:
+        if column not in df.columns:
+            df[column] = ""
+
+    return df[SHEET_HEADERS[sheet_name]].fillna("")
+
 
 def get_database_status() -> pd.DataFrame:
     rows = []
@@ -91,7 +126,8 @@ def get_database_status() -> pd.DataFrame:
         ws = _get_worksheet(sheet_name)
         current = ws.row_values(1)
         values = ws.get_all_values()
-        missing = [h for h in expected if h not in current]
+        missing = [header for header in expected if header not in current]
+
         rows.append({
             "Worksheet": sheet_name,
             "Status": "Ready" if not missing else "Header incomplete",
@@ -99,49 +135,58 @@ def get_database_status() -> pd.DataFrame:
             "Columns": len(current),
             "Missing Headers": ", ".join(missing),
         })
+
     return pd.DataFrame(rows)
 
-@st.cache_data(ttl=60, show_spinner=False)
-def read_sheet(sheet_name: str) -> pd.DataFrame:
-    ws = _get_worksheet(sheet_name)
-    records = ws.get_all_records(default_blank="")
-    if not records:
-        return pd.DataFrame(columns=SHEET_HEADERS[sheet_name])
-    df = pd.DataFrame(records)
-    for column in SHEET_HEADERS[sheet_name]:
-        if column not in df.columns:
-            df[column] = ""
-    return df[SHEET_HEADERS[sheet_name]].fillna("")
 
 def get_settings(category: str) -> list[str]:
     df = read_sheet("Settings")
     if df.empty:
         return []
+
     mask = (
         df["Category"].astype(str).str.strip().str.casefold()
         == category.strip().casefold()
     )
     values = df.loc[mask, "Value"].astype(str).str.strip()
-    return [v for v in values.tolist() if v]
+    return [value for value in values.tolist() if value]
+
 
 def _next_id(existing: list[str], prefix: str, digits: int = 4) -> str:
     highest = 0
     pattern = re.compile(rf"^{re.escape(prefix)}(\d+)$", re.IGNORECASE)
+
     for value in existing:
         match = pattern.match(str(value).strip())
         if match:
             highest = max(highest, int(match.group(1)))
+
     return f"{prefix}{highest + 1:0{digits}d}"
+
 
 def generate_recipe_id() -> str:
     recipes = read_sheet("Recipe_Master")
     ids = recipes["Recipe_ID"].astype(str).tolist() if not recipes.empty else []
     return _next_id(ids, "BT", 4)
 
+
+def generate_log_id() -> str:
+    logs = read_sheet("Brew_Log")
+    ids = logs["Log_ID"].astype(str).tolist() if not logs.empty else []
+    return _next_id(ids, "BL", 4)
+
+
 def add_recipe(
-    *, recipe_name: str, brew_method: str, ownership: str,
-    purposes: list[str], source: str, version: str, status: str,
-    favorite: str, tags: str
+    *,
+    recipe_name: str,
+    brew_method: str,
+    ownership: str,
+    purposes: list[str],
+    source: str,
+    version: str,
+    status: str,
+    favorite: str,
+    tags: str,
 ) -> str:
     recipe_name = recipe_name.strip()
     if not recipe_name:
@@ -154,10 +199,13 @@ def add_recipe(
             == recipe_name.casefold()
         )
         if duplicate.any():
-            raise ValueError("Recipe Name sudah tersedia. Gunakan nama atau versi berbeda.")
+            raise ValueError(
+                "Recipe Name sudah tersedia. Gunakan nama atau versi berbeda."
+            )
 
     recipe_id = generate_recipe_id()
     today = date.today().isoformat()
+
     record = {
         "Recipe_ID": recipe_id,
         "Recipe_Name": recipe_name,
@@ -175,22 +223,24 @@ def add_recipe(
 
     ws = _get_worksheet("Recipe_Master")
     ws.append_row(
-        [_clean(record.get(c, "")) for c in SHEET_HEADERS["Recipe_Master"]],
+        [_clean(record.get(column, "")) for column in SHEET_HEADERS["Recipe_Master"]],
         value_input_option="USER_ENTERED",
     )
     clear_data_cache()
     return recipe_id
 
 
-def get_recipe(recipe_id: str):
+def get_recipe(recipe_id: str) -> dict[str, Any] | None:
     recipes = read_sheet("Recipe_Master")
     if recipes.empty:
         return None
+
     match = recipes.loc[
         recipes["Recipe_ID"].astype(str).str.strip() == recipe_id.strip()
     ]
     if match.empty:
         return None
+
     return match.iloc[0].to_dict()
 
 
@@ -221,6 +271,78 @@ def update_recipe(recipe_id: str, updates: dict[str, Any]) -> None:
         value_input_option="USER_ENTERED",
     )
     clear_data_cache()
+
+
+def add_brew_log(
+    *,
+    log_date: str,
+    recipe_id: str,
+    bean_name: str,
+    roast_profile: str,
+    dose_g: str,
+    water_g: str,
+    ratio: str,
+    grind_setting: str,
+    water_temp_c: str,
+    brew_time: str,
+    aroma: float,
+    sweetness: float,
+    acidity: float,
+    body: float,
+    clarity: float,
+    balance: float,
+    aftertaste: float,
+    overall_notes: str,
+) -> tuple[str, float]:
+    if not recipe_id.strip():
+        raise ValueError("Recipe wajib dipilih.")
+
+    score_values = [
+        aroma, sweetness, acidity, body, clarity, balance, aftertaste
+    ]
+    overall_score = round(sum(score_values) / len(score_values), 2)
+    log_id = generate_log_id()
+
+    record = {
+        "Log_ID": log_id,
+        "Date": log_date,
+        "Recipe_ID": recipe_id,
+        "Bean_Name": bean_name.strip(),
+        "Roast_Profile": roast_profile.strip(),
+        "Dose_g": dose_g.strip(),
+        "Water_g": water_g.strip(),
+        "Ratio": ratio.strip(),
+        "Grind_Setting": grind_setting.strip(),
+        "Water_Temp_C": water_temp_c.strip(),
+        "Brew_Time": brew_time.strip(),
+        "Result_Score": overall_score,
+        "Aroma": aroma,
+        "Sweetness": sweetness,
+        "Acidity": acidity,
+        "Body": body,
+        "Clarity": clarity,
+        "Balance": balance,
+        "Aftertaste": aftertaste,
+        "Overall_Notes": overall_notes.strip(),
+    }
+
+    ws = _get_worksheet("Brew_Log")
+    ws.append_row(
+        [_clean(record.get(column, "")) for column in SHEET_HEADERS["Brew_Log"]],
+        value_input_option="USER_ENTERED",
+    )
+    clear_data_cache()
+    return log_id, overall_score
+
+
+def get_brew_logs(recipe_id: str | None = None) -> pd.DataFrame:
+    logs = read_sheet("Brew_Log")
+    if logs.empty or not recipe_id:
+        return logs
+
+    return logs.loc[
+        logs["Recipe_ID"].astype(str).str.strip() == recipe_id.strip()
+    ].copy()
 
 
 def clear_data_cache() -> None:
