@@ -15,7 +15,7 @@ div[data-testid="stSidebarNav"] p {font-size: 22px !important;}
 """, unsafe_allow_html=True)
 
 st.title("☕ Brew & Things")
-st.caption("Coffee Intelligence System • V20.3 • Recipe Detail & Revision")
+st.caption("Coffee Intelligence System • V20.3.1 • Stability Fix")
 
 try:
     brew_db.ensure_database_structure()
