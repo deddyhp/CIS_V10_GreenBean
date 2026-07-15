@@ -17,7 +17,7 @@ SCOPES = [
 SHEET_HEADERS = {
     "Recipe_Master": [
         "Recipe_ID","Recipe_Name","Brew_Method","Ownership","Purpose","Source",
-        "Version","Status","Created_Date","Last_Update","Favorite","Tags"
+        "Version","Status","Created_Date","Last_Update","Favorite","Tags","Bean_Name","Dose_g","Water_g","Ratio","Grind_Setting","Water_Temp_C","Target_Brew_Time","Brewing_Steps"
     ],
     "Brew_Log": [
         "Log_ID","Date","Recipe_ID","Bean_Name","Roast_Profile","Dose_g",
@@ -178,6 +178,46 @@ def add_recipe(
         value_input_option="USER_ENTERED",
     )
     return recipe_id
+
+
+def get_recipe(recipe_id: str):
+    recipes = read_sheet("Recipe_Master")
+    if recipes.empty:
+        return None
+    match = recipes.loc[
+        recipes["Recipe_ID"].astype(str).str.strip() == recipe_id.strip()
+    ]
+    if match.empty:
+        return None
+    return match.iloc[0].to_dict()
+
+
+def update_recipe(recipe_id: str, updates: dict[str, Any]) -> None:
+    ws = _get_worksheet("Recipe_Master")
+    headers = ws.row_values(1)
+
+    if "Recipe_ID" not in headers:
+        raise RuntimeError("Header Recipe_ID tidak ditemukan.")
+
+    id_column = headers.index("Recipe_ID") + 1
+    cell = ws.find(recipe_id, in_column=id_column)
+    if cell is None:
+        raise ValueError(f"Recipe {recipe_id} tidak ditemukan.")
+
+    current_values = ws.row_values(cell.row)
+    if len(current_values) < len(headers):
+        current_values += [""] * (len(headers) - len(current_values))
+
+    row_map = dict(zip(headers, current_values))
+    row_map.update({key: _clean(value) for key, value in updates.items()})
+    row_map["Recipe_ID"] = recipe_id
+    row_map["Last_Update"] = date.today().isoformat()
+
+    ws.update(
+        f"A{cell.row}",
+        [[row_map.get(header, "") for header in headers]],
+        value_input_option="USER_ENTERED",
+    )
 
 def clear_connection_cache() -> None:
     _get_worksheet.clear()
