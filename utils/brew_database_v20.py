@@ -101,6 +101,7 @@ def get_database_status() -> pd.DataFrame:
         })
     return pd.DataFrame(rows)
 
+@st.cache_data(ttl=60, show_spinner=False)
 def read_sheet(sheet_name: str) -> pd.DataFrame:
     ws = _get_worksheet(sheet_name)
     records = ws.get_all_records(default_blank="")
@@ -174,9 +175,10 @@ def add_recipe(
 
     ws = _get_worksheet("Recipe_Master")
     ws.append_row(
-        [_clean(record[c]) for c in SHEET_HEADERS["Recipe_Master"]],
+        [_clean(record.get(c, "")) for c in SHEET_HEADERS["Recipe_Master"]],
         value_input_option="USER_ENTERED",
     )
+    clear_data_cache()
     return recipe_id
 
 
@@ -218,7 +220,14 @@ def update_recipe(recipe_id: str, updates: dict[str, Any]) -> None:
         [[row_map.get(header, "") for header in headers]],
         value_input_option="USER_ENTERED",
     )
+    clear_data_cache()
+
+
+def clear_data_cache() -> None:
+    read_sheet.clear()
+
 
 def clear_connection_cache() -> None:
+    clear_data_cache()
     _get_worksheet.clear()
     _get_spreadsheet.clear()
