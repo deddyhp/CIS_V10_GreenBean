@@ -26,32 +26,6 @@ st.caption("Coffee Intelligent System • V10.9")
 
 st.divider()
 
-st.subheader("🆕 Version History")
-st.markdown("""
-### V10.9
-- 💰 Acquisition Price per kg
-- 📊 Remaining Stock Value
-- 🔄 Backward Compatible with V10.8 Data
-
-### V10.8
-- ☁️ Google Sheets Cloud Database
-- ✏️ Edit Bean Properties
-- 🧾 Stock Adjustment Remark
-- 🕘 Update History Information
-
-### V10.7
-- 👓 Bigger Sidebar Menu Font
-- ✅ Keep Default App Navigation
-- 🌱 Green Bean Module Unchanged
-
-### V10.6
-- 📦 Simple Inventory View
-- 👆 Open Bean Properties from Stock List
-- ⚖️ Update Remaining Stock
-""")
-
-st.divider()
-
 with st.expander("➕ Add New Green Bean"):
     with st.form("add_greenbean_form", clear_on_submit=True):
         bean_name = st.text_input("Bean Name")
