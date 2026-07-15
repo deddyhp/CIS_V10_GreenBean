@@ -20,7 +20,7 @@ div[data-testid="stSidebarNav"] p {
 """, unsafe_allow_html=True)
 
 st.title("☕ Brew & Things")
-st.caption("Coffee Intelligence System • V20.4 • Brew Test Log")
+st.caption("Coffee Intelligence System • V20.4.1 • Brew Log Summary Fix")
 
 try:
     brew_db.ensure_database_structure()
@@ -31,19 +31,26 @@ except Exception as exc:
 recipes = brew_db.read_sheet("Recipe_Master")
 logs = brew_db.read_sheet("Brew_Log")
 
-status_series = (
-    recipes["Status"].astype(str).str.strip()
-    if not recipes.empty else pd.Series(dtype=str)
-)
 favorite_series = (
     recipes["Favorite"].astype(str).str.strip().str.casefold()
     if not recipes.empty else pd.Series(dtype=str)
 )
+log_scores = (
+    pd.to_numeric(logs["Result_Score"], errors="coerce")
+    if not logs.empty else pd.Series(dtype=float)
+)
+average_score = (
+    float(log_scores.mean())
+    if log_scores.notna().any() else None
+)
 
 m1, m2, m3, m4 = st.columns(4)
 m1.metric("Total Recipes", len(recipes))
-m2.metric("Testing", int((status_series == "Testing").sum()))
-m3.metric("Brew Tests", len(logs))
+m2.metric("Brew Tests", len(logs))
+m3.metric(
+    "Average Score",
+    f"{average_score:.2f} / 5" if average_score is not None else "-"
+)
 m4.metric("Favorites", int((favorite_series == "yes").sum()))
 
 library_tab, detail_tab, new_tab, brew_log_tab, db_tab = st.tabs(
@@ -390,7 +397,7 @@ with brew_log_tab:
         selected_id = recipe_options[selected_label]
         recipe = brew_db.get_recipe(selected_id) or {}
 
-        with st.form("brew_log_form", clear_on_submit=True):
+        with st.form("brew_log_form", clear_on_submit=False):
             c1, c2 = st.columns(2)
 
             with c1:
@@ -430,16 +437,16 @@ with brew_log_tab:
             st.markdown("### Sensory Score")
             s1, s2, s3, s4 = st.columns(4)
             with s1:
-                aroma = st.slider("Aroma", 1.0, 5.0, 3.0, 0.5)
-                sweetness = st.slider("Sweetness", 1.0, 5.0, 3.0, 0.5)
+                aroma = st.slider("Aroma", 1.0, 5.0, 3.0, 0.5, key="score_aroma")
+                sweetness = st.slider("Sweetness", 1.0, 5.0, 3.0, 0.5, key="score_sweetness")
             with s2:
-                acidity = st.slider("Acidity", 1.0, 5.0, 3.0, 0.5)
-                body = st.slider("Body", 1.0, 5.0, 3.0, 0.5)
+                acidity = st.slider("Acidity", 1.0, 5.0, 3.0, 0.5, key="score_acidity")
+                body = st.slider("Body", 1.0, 5.0, 3.0, 0.5, key="score_body")
             with s3:
-                clarity = st.slider("Clarity", 1.0, 5.0, 3.0, 0.5)
-                balance = st.slider("Balance", 1.0, 5.0, 3.0, 0.5)
+                clarity = st.slider("Clarity", 1.0, 5.0, 3.0, 0.5, key="score_clarity")
+                balance = st.slider("Balance", 1.0, 5.0, 3.0, 0.5, key="score_balance")
             with s4:
-                aftertaste = st.slider("Aftertaste", 1.0, 5.0, 3.0, 0.5)
+                aftertaste = st.slider("Aftertaste", 1.0, 5.0, 3.0, 0.5, key="score_aftertaste")
 
             preview_score = round(
                 (
@@ -449,6 +456,7 @@ with brew_log_tab:
                 2,
             )
             st.metric("Automatic Overall Score", f"{preview_score:.2f} / 5")
+            st.caption("Score dihitung otomatis dari 7 sensory parameters saat Save Brew Test.")
 
             overall_notes = st.text_area(
                 "Brew Result Notes",
