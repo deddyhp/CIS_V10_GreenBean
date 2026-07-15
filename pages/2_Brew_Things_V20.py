@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-import utils.brew_database as brew_db
+import utils.brew_database_v20 as brew_db
 
 st.set_page_config(page_title="Brew & Things", page_icon="☕", layout="wide")
 
