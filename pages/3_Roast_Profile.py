@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import os
 import sqlite3
 import zipfile
 from io import BytesIO
@@ -20,7 +21,28 @@ PROJECT_ROOT = PAGE_DIR.parent
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "artisan_raw"
 DB_PATH = DATA_DIR / "coffee_intelligence.db"
-RAW_DIR.mkdir(parents=True, exist_ok=True)
+
+# CIS execution mode
+# - Laptop/local run: Full Mode
+# - Streamlit Community Cloud (/mount/src): Fallback Mode
+# Override when needed with environment variable:
+#   CIS_MODE=full
+#   CIS_MODE=fallback
+_MODE_OVERRIDE = os.getenv("CIS_MODE", "").strip().lower()
+_IS_STREAMLIT_CLOUD = str(PROJECT_ROOT).replace("\\", "/").startswith("/mount/src/")
+
+if _MODE_OVERRIDE == "full":
+    FULL_MODE = True
+elif _MODE_OVERRIDE == "fallback":
+    FULL_MODE = False
+else:
+    FULL_MODE = not _IS_STREAMLIT_CLOUD
+
+SYSTEM_MODE = "FULL" if FULL_MODE else "FALLBACK"
+
+# Only Full Mode creates and uses the permanent local data directories.
+if FULL_MODE:
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @dataclass
@@ -535,7 +557,7 @@ def ensure_bean(con: sqlite3.Connection, bean_name: str, species: str, origin: s
 
 
 def save_roast(parsed: ParsedRoast, form: dict[str, Any], manual_events: pd.DataFrame) -> str:
-    duplicate = existing_checksum(parsed.checksum)
+    duplicate = existing_checksum(parsed.checksum) if FULL_MODE else None
     if duplicate:
         raise ValueError(f"File sudah pernah diimport sebagai {duplicate[0]} — {duplicate[1]}")
     with db() as con:
@@ -820,9 +842,23 @@ def roast_chart(parsed: ParsedRoast) -> go.Figure:
 
 
 def app() -> None:
-    init_db()
+    if FULL_MODE:
+        init_db()
+
     st.title("🔥 Roast Profile")
     st.caption("CIS Roast Log V0.4.4 — integrated module for roast import, database exploration, and profile review.")
+
+    if FULL_MODE:
+        st.success(
+            "💻 FULL MODE — database SQLite lokal aktif. "
+            "Import, penyimpanan, database, edit data, dan grafik tersedia."
+        )
+    else:
+        st.info(
+            "📱 FALLBACK MODE — berjalan di Streamlit Cloud. "
+            "Single .alog dapat dipreview, tetapi penyimpanan permanen, Bulk Import, "
+            "dan Roast Database utama hanya tersedia dari laptop / Remote."
+        )
 
     page = st.radio(
         "Roast Profile Menu",
@@ -831,25 +867,59 @@ def app() -> None:
         label_visibility="collapsed",
     )
     if page == "Home":
-        with db() as con:
-            roasts = con.execute("SELECT COUNT(*) FROM roast_sessions").fetchone()[0]
-            beans = con.execute("SELECT COUNT(*) FROM green_beans").fetchone()[0]
-            arabica = con.execute("SELECT COUNT(*) FROM roast_sessions rs JOIN green_beans gb ON gb.id=rs.bean_id WHERE gb.species='Arabica'").fetchone()[0]
-            robusta = con.execute("SELECT COUNT(*) FROM roast_sessions rs JOIN green_beans gb ON gb.id=rs.bean_id WHERE gb.species='Robusta'").fetchone()[0]
-            origins = con.execute("SELECT COUNT(DISTINCT origin) FROM green_beans WHERE origin IS NOT NULL AND origin<>'' AND origin<>'Unknown'").fetchone()[0]
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Total Roast Logs", roasts)
-        c2.metric("Arabica Logs", arabica)
-        c3.metric("Robusta Logs", robusta)
-        c4.metric("Total Origins", origins)
-        st.info("Use Import Roast for daily files and Bulk Import for your historical .alog archive.")
+        if FULL_MODE:
+            with db() as con:
+                roasts = con.execute("SELECT COUNT(*) FROM roast_sessions").fetchone()[0]
+                arabica = con.execute(
+                    "SELECT COUNT(*) FROM roast_sessions rs "
+                    "JOIN green_beans gb ON gb.id=rs.bean_id WHERE gb.species='Arabica'"
+                ).fetchone()[0]
+                robusta = con.execute(
+                    "SELECT COUNT(*) FROM roast_sessions rs "
+                    "JOIN green_beans gb ON gb.id=rs.bean_id WHERE gb.species='Robusta'"
+                ).fetchone()[0]
+                origins = con.execute(
+                    "SELECT COUNT(DISTINCT origin) FROM green_beans "
+                    "WHERE origin IS NOT NULL AND origin<>'' AND origin<>'Unknown'"
+                ).fetchone()[0]
+
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("Total Roast Logs", roasts)
+            c2.metric("Arabica Logs", arabica)
+            c3.metric("Robusta Logs", robusta)
+            c4.metric("Total Origins", origins)
+            st.info("Use Import Roast for daily files and Bulk Import for your historical .alog archive.")
+        else:
+            st.markdown("### Mobile Preview")
+            st.write(
+                "Gunakan **Import Roast** untuk membuka satu file Artisan `.alog` "
+                "dan melihat kurva, milestone, physical result, serta event roast."
+            )
+            st.warning(
+                "Data yang dipreview di Fallback Mode tidak disimpan ke database utama. "
+                "Gunakan CIS dari laptop atau Remote untuk Save Roast, Bulk Import, "
+                "Roast Database, dan edit permanen."
+            )
         return
 
     if page == "Bulk Import":
+        if not FULL_MODE:
+            st.warning(
+                "Bulk Import dinonaktifkan pada Fallback Mode karena hasilnya harus "
+                "disimpan langsung ke database lokal laptop."
+            )
+            st.info("Buka CIS melalui laptop / Remote untuk melakukan Bulk Import.")
+            return
         render_bulk_import()
         return
 
     if page == "Roast Database":
+        if not FULL_MODE:
+            st.warning(
+                "Roast Database utama berada di laptop dan tidak disalin ke Streamlit Cloud."
+            )
+            st.info("Buka CIS melalui laptop / Remote untuk melihat dan mengedit database.")
+            return
         with db() as con:
             df = pd.read_sql_query(
                 """SELECT rs.roast_id,rs.roast_date,gb.species,gb.origin,rs.title,gb.bean_name,gb.process,gb.supplier,gb.lot,
@@ -1042,18 +1112,24 @@ def app() -> None:
     if not manual.empty:
         manual = manual.sort_values("bt")
 
-    if st.button("Save Roast", type="primary", disabled=bool(duplicate)):
-        try:
-            roast_id = save_roast(parsed, {
-                "bean_name": bean_name.strip(), "species": species, "origin": origin.strip(), "process": process.strip(),
-                "supplier": supplier.strip() or "Unknown", "lot": lot.strip(), "purpose": purpose,
-                "blend_project": blend_project.strip(), "profile_version": profile_version.strip(),
-                "drum_speed": drum_speed, "agtron": None if agtron == 0 else agtron,
-                "notes": notes.strip(), "quality": quality,
-            }, manual)
-            st.success(f"Roast saved successfully: {roast_id}")
-        except Exception as exc:
-            st.error(str(exc))
+    if FULL_MODE:
+        if st.button("Save Roast", type="primary", disabled=bool(duplicate)):
+            try:
+                roast_id = save_roast(parsed, {
+                    "bean_name": bean_name.strip(), "species": species, "origin": origin.strip(), "process": process.strip(),
+                    "supplier": supplier.strip() or "Unknown", "lot": lot.strip(), "purpose": purpose,
+                    "blend_project": blend_project.strip(), "profile_version": profile_version.strip(),
+                    "drum_speed": drum_speed, "agtron": None if agtron == 0 else agtron,
+                    "notes": notes.strip(), "quality": quality,
+                }, manual)
+                st.success(f"Roast saved successfully: {roast_id}")
+            except Exception as exc:
+                st.error(str(exc))
+    else:
+        st.warning(
+            "Preview selesai. Tombol **Save Roast** tidak tersedia pada Fallback Mode "
+            "agar database utama tetap hanya berada di laptop."
+        )
 
 
 # Streamlit multipage: jalankan halaman langsung saat file dibuka dari folder pages.
