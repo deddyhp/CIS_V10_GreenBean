@@ -8,8 +8,6 @@ st.set_page_config(
 
 st.title("📖 CIS Release History")
 st.caption("Coffee Intelligent System - Version Achievement Record")
-st.title("📖 CIS Release History")
-st.caption("Coffee Intelligent System - Version Achievement Record")
 
 st.divider()
 
