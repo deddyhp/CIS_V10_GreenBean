@@ -1,3 +1,13 @@
+import streamlit as st
+
+st.set_page_config(
+    page_title="CIS Release History",
+    page_icon="📖",
+    layout="wide"
+)
+
+st.title("📖 CIS Release History")
+st.caption("Coffee Intelligent System - Version Achievement Record")
 st.title("📖 CIS Release History")
 st.caption("Coffee Intelligent System - Version Achievement Record")
 
