@@ -1,0 +1,33 @@
+[
+  {
+    "id": "espresso-seimbang-001",
+    "title": "Dasar Espresso Seimbang",
+    "category": "Espresso",
+    "subcategory": "Extraction Basics",
+    "summary": "Panduan visual tentang keseimbangan manis, acidity yang fresh, bitterness yang clean, freshness bean, rasio, grind size, waktu ekstraksi, dan suhu air.",
+    "source": "Overdosis Kafein",
+    "tags": [
+      "espresso",
+      "ratio",
+      "grind size",
+      "temperature",
+      "freshness",
+      "extraction",
+      "troubleshooting"
+    ],
+    "pagerwatu_note": "Gunakan sebagai referensi awal, bukan angka mutlak. Dial-in tetap mengikuti roast level, karakter bean, basket, tekanan, dan kemampuan mesin.",
+    "images": [
+      "data/brew_knowledge_assets/espresso_seimbang/01.png",
+      "data/brew_knowledge_assets/espresso_seimbang/02.png",
+      "data/brew_knowledge_assets/espresso_seimbang/03.png",
+      "data/brew_knowledge_assets/espresso_seimbang/04.png",
+      "data/brew_knowledge_assets/espresso_seimbang/05.png",
+      "data/brew_knowledge_assets/espresso_seimbang/06.png",
+      "data/brew_knowledge_assets/espresso_seimbang/07.png",
+      "data/brew_knowledge_assets/espresso_seimbang/08.png",
+      "data/brew_knowledge_assets/espresso_seimbang/09.png"
+    ],
+    "status": "Reference",
+    "created_at": "2026-07-19"
+  }
+]
