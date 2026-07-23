@@ -1,0 +1,412 @@
+[
+  {
+    "id": "v60-common-001",
+    "title": "V60 Floral Honey Clarity",
+    "dripper": "Hario V60 Ceramic",
+    "paper": "Common V60 Paper",
+    "goal": "Floral, acidity terstruktur, honey sweetness, clean finish",
+    "bean_fit": [
+      "Kenya washed",
+      "Puntang",
+      "Papua Wamena",
+      "Ethiopia washed"
+    ],
+    "dose_g": 15,
+    "water_g": 250,
+    "ratio": "1:16.7",
+    "temperature_c": "93–94°C",
+    "grind": "Medium-fine",
+    "df64_start": "Baseline V60 medium-fine",
+    "brew_time": "2:35–3:00",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:40 — Tuang sampai 150 g",
+      "1:20 — Tuang sampai 250 g"
+    ],
+    "reason": [
+      "Flow lebih terkendali.",
+      "Acidity lebih terstruktur.",
+      "Body sedikit lebih penuh tanpa kehilangan clarity."
+    ],
+    "target_profile": {
+      "aroma": "Floral",
+      "acidity": "Terstruktur",
+      "sweetness": "Honey-like",
+      "body": "Medium-silky",
+      "finish": "Clean"
+    },
+    "troubleshooting": {
+      "Terlalu asam": "Haluskan grind atau naikkan suhu 1°C.",
+      "Terlalu pahit": "Kasarkan grind dan kurangi agitasi.",
+      "Kurang aroma": "Perpanjang bloom dan jaga pouring lebih lembut.",
+      "Finish kering": "Kurangi swirl."
+    },
+    "status": "AI Recommended",
+    "notes": "Baseline aman untuk V60 keramik."
+  },
+  {
+    "id": "v60-nudo-001",
+    "title": "V60 Silky Juicy",
+    "dripper": "Hario V60 Ceramic",
+    "paper": "Nudo Thin Paper",
+    "goal": "Ekstraksi lebih tinggi, silky, juicy, tetap clean",
+    "bean_fit": [
+      "Light roast washed",
+      "Kenya",
+      "Bali Kintamani",
+      "Flores Bajawa"
+    ],
+    "dose_g": 15,
+    "water_g": 250,
+    "ratio": "1:16.7",
+    "temperature_c": "92–94°C",
+    "grind": "Medium-fine",
+    "df64_start": "Sedikit lebih kasar dari common paper",
+    "brew_time": "2:30–2:55",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:40 — Tuang sampai 110 g",
+      "1:05 — Tuang sampai 175 g",
+      "1:35 — Tuang sampai 250 g"
+    ],
+    "reason": [
+      "Paper tipis mempercepat flow.",
+      "Clarity naik.",
+      "Empat pouring menjaga sweetness."
+    ],
+    "target_profile": {
+      "aroma": "Terbuka",
+      "acidity": "Juicy",
+      "sweetness": "Madu",
+      "body": "Silky",
+      "finish": "Clean"
+    },
+    "troubleshooting": {
+      "Terlalu tipis": "Haluskan grind sedikit.",
+      "Terlalu dry": "Kurangi agitasi.",
+      "Flow terlalu cepat": "Haluskan grind.",
+      "Finish kurang clean": "Hindari pouring ke dinding paper."
+    },
+    "status": "AI Recommended",
+    "notes": "Preheat dripper keramik dengan baik."
+  },
+  {
+    "id": "origami-common-001",
+    "title": "Origami Tea-Like Aroma",
+    "dripper": "Origami Dripper",
+    "paper": "Common V60 Paper",
+    "goal": "Tea-like, floral, sparkling acidity, body ringan",
+    "bean_fit": [
+      "Kenya clean & bright",
+      "Puntang light roast",
+      "Ethiopia washed"
+    ],
+    "dose_g": 15,
+    "water_g": 250,
+    "ratio": "1:16.7",
+    "temperature_c": "92°C",
+    "grind": "Medium-fine menuju medium",
+    "df64_start": "Sekitar 65–70 dari burr-touch zero",
+    "brew_time": "2:35–2:55",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:45 — Tuang sampai 150 g",
+      "1:25 — Tuang sampai 250 g"
+    ],
+    "reason": [
+      "Origami membuka aroma.",
+      "Common paper menahan flow secukupnya.",
+      "Agitasi rendah menjaga tea-like."
+    ],
+    "target_profile": {
+      "aroma": "Floral terbuka",
+      "acidity": "Sparkling",
+      "sweetness": "Jernih",
+      "body": "Light",
+      "finish": "Clean"
+    },
+    "troubleshooting": {
+      "Terlalu asam": "Haluskan grind atau naikkan suhu 1°C.",
+      "Terlalu pahit": "Kasarkan grind.",
+      "Aroma tertutup": "Kurangi agitasi.",
+      "Flow terlalu lambat": "Kasarkan grind."
+    },
+    "status": "AI Recommended",
+    "notes": "Untuk natural/anaerobic mulai 90–91°C."
+  },
+  {
+    "id": "origami-origami-001",
+    "title": "Origami Balanced Signature",
+    "dripper": "Origami Dripper",
+    "paper": "Origami Paper",
+    "goal": "Aroma terbuka, sweetness jelas, clarity bagus, paling seimbang untuk Origami",
+    "bean_fit": [
+      "Washed floral",
+      "Honey process",
+      "Kenya balanced",
+      "Bali Kintamani"
+    ],
+    "dose_g": 15,
+    "water_g": 250,
+    "ratio": "1:16.7",
+    "temperature_c": "92–93°C",
+    "grind": "Medium",
+    "df64_start": "Sedikit lebih kasar dari V60 common",
+    "brew_time": "2:20–2:45",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:40 — Tuang sampai 130 g",
+      "1:10 — Tuang sampai 190 g",
+      "1:35 — Tuang sampai 250 g"
+    ],
+    "reason": [
+      "Paper Origami mengikuti geometri dripper.",
+      "Flow cepat tetapi stabil.",
+      "Menjaga sweetness dan clarity tetap seimbang."
+    ],
+    "target_profile": {
+      "aroma": "Terbuka",
+      "acidity": "Bright-balanced",
+      "sweetness": "Jelas",
+      "body": "Silky-light",
+      "finish": "Clean"
+    },
+    "troubleshooting": {
+      "Terlalu tipis": "Haluskan grind sedikit.",
+      "Terlalu tajam": "Turunkan suhu 1°C.",
+      "Kurang sweet": "Tambah satu pouring kecil.",
+      "Drawdown cepat sekali": "Haluskan grind."
+    },
+    "status": "AI Recommended",
+    "notes": "Pilihan paling aman untuk karakter khas Origami."
+  },
+  {
+    "id": "origami-nudo-001",
+    "title": "Origami Modern Juicy",
+    "dripper": "Origami Dripper",
+    "paper": "Nudo Thin Paper",
+    "goal": "Aroma paling intens, juicy, silky, modern",
+    "bean_fit": [
+      "Light roast aromatic",
+      "Natural clean",
+      "Kenya fruity",
+      "Experimental clean"
+    ],
+    "dose_g": 15,
+    "water_g": 250,
+    "ratio": "1:16.7",
+    "temperature_c": "90–92°C",
+    "grind": "Medium-fine",
+    "df64_start": "Sedikit lebih halus dari Origami paper",
+    "brew_time": "2:15–2:40",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:40 — Tuang sampai 120 g",
+      "1:05 — Tuang sampai 185 g",
+      "1:30 — Tuang sampai 250 g"
+    ],
+    "reason": [
+      "Kombinasi dripper cepat dan paper tipis meningkatkan aroma.",
+      "Extraction terasa juicy.",
+      "Body tetap silky walau clarity tinggi."
+    ],
+    "target_profile": {
+      "aroma": "Sangat intens",
+      "acidity": "Juicy",
+      "sweetness": "Modern-fruity",
+      "body": "Silky",
+      "finish": "Bright-clean"
+    },
+    "troubleshooting": {
+      "Terlalu tajam": "Turunkan suhu 1–2°C.",
+      "Body terlalu ringan": "Haluskan grind sedikit.",
+      "Aroma terlalu fermenty": "Turunkan suhu dan kurangi bloom.",
+      "Flow terlalu cepat": "Haluskan grind."
+    },
+    "status": "AI Recommended",
+    "notes": "Paling cocok untuk bean clean; hati-hati pada anaerobic sangat intens."
+  },
+  {
+    "id": "hybrid-common-001",
+    "title": "Hybrid Sweet Rounded",
+    "dripper": "Hybrid Dripper",
+    "paper": "Common V60 Paper",
+    "goal": "Sweetness tinggi, acidity bulat, body juicy",
+    "bean_fit": [
+      "Medium-light washed",
+      "Honey process",
+      "Bali Kintamani",
+      "Flores Bajawa"
+    ],
+    "dose_g": 15,
+    "water_g": 240,
+    "ratio": "1:16",
+    "temperature_c": "92–93°C",
+    "grind": "Medium-fine",
+    "df64_start": "Baseline V60 lalu sedikit lebih kasar bila flow lambat",
+    "brew_time": "2:40–3:10",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:45 — Tuang sampai 140 g",
+      "1:25 — Tuang sampai 240 g"
+    ],
+    "reason": [
+      "Hybrid mempertahankan body.",
+      "Common paper memberi resistance stabil.",
+      "Cocok untuk sweetness dan roundness."
+    ],
+    "target_profile": {
+      "aroma": "Manis",
+      "acidity": "Bulat",
+      "sweetness": "Tinggi",
+      "body": "Juicy-medium",
+      "finish": "Rounded"
+    },
+    "troubleshooting": {
+      "Terlalu berat": "Kasarkan grind atau tambah air 10 g.",
+      "Terlalu asam": "Haluskan grind.",
+      "Kurang clean": "Kurangi agitasi.",
+      "Drawdown lambat": "Kasarkan grind."
+    },
+    "status": "AI Recommended",
+    "notes": "Gunakan sebagai daily sweet brew."
+  },
+  {
+    "id": "hybrid-nudo-001",
+    "title": "Hybrid Clean Rounded",
+    "dripper": "Hybrid Dripper",
+    "paper": "Nudo Thin Paper",
+    "goal": "Lebih clean dan terang, tetapi tetap rounded",
+    "bean_fit": [
+      "Washed medium-light",
+      "Kenya balanced",
+      "Papua Wamena",
+      "Puntang"
+    ],
+    "dose_g": 15,
+    "water_g": 245,
+    "ratio": "1:16.3",
+    "temperature_c": "91–93°C",
+    "grind": "Medium-fine",
+    "df64_start": "Sedikit lebih halus dari hybrid + common",
+    "brew_time": "2:25–2:55",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:40 — Tuang sampai 120 g",
+      "1:10 — Tuang sampai 185 g",
+      "1:35 — Tuang sampai 245 g"
+    ],
+    "reason": [
+      "Nudo meningkatkan clarity.",
+      "Hybrid menjaga roundness.",
+      "Hasil lebih terang tetapi tidak tipis."
+    ],
+    "target_profile": {
+      "aroma": "Terang",
+      "acidity": "Clean-rounded",
+      "sweetness": "Jernih",
+      "body": "Silky-medium",
+      "finish": "Clean"
+    },
+    "troubleshooting": {
+      "Terlalu tipis": "Haluskan grind.",
+      "Terlalu tajam": "Turunkan suhu 1°C.",
+      "Kurang body": "Turunkan rasio ke 1:16.",
+      "Flow terlalu cepat": "Haluskan grind."
+    },
+    "status": "AI Recommended",
+    "notes": "Kombinasi untuk clean cup dengan body tetap ada."
+  },
+  {
+    "id": "simple-common-001",
+    "title": "Simple Daily Balanced",
+    "dripper": "Simple Dripper",
+    "paper": "Common V60 Paper",
+    "goal": "Daily brew, balanced, medium body, mudah konsisten",
+    "bean_fit": [
+      "Semua washed medium-light",
+      "Blend harian",
+      "Bali",
+      "Flores",
+      "Toraja filter"
+    ],
+    "dose_g": 15,
+    "water_g": 240,
+    "ratio": "1:16",
+    "temperature_c": "92–93°C",
+    "grind": "Medium",
+    "df64_start": "Baseline daily brew",
+    "brew_time": "2:30–3:00",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:40 — Tuang sampai 140 g",
+      "1:20 — Tuang sampai 240 g"
+    ],
+    "reason": [
+      "Resep mudah diulang.",
+      "Common paper stabil.",
+      "Cocok untuk utilization harian."
+    ],
+    "target_profile": {
+      "aroma": "Seimbang",
+      "acidity": "Moderate",
+      "sweetness": "Balanced",
+      "body": "Medium",
+      "finish": "Clean-medium"
+    },
+    "troubleshooting": {
+      "Terlalu asam": "Haluskan grind.",
+      "Terlalu pahit": "Kasarkan grind.",
+      "Kurang body": "Kurangi air menjadi 230 g.",
+      "Kurang clean": "Kurangi agitasi."
+    },
+    "status": "AI Recommended",
+    "notes": "Pilihan paling aman untuk daily brew."
+  },
+  {
+    "id": "simple-nudo-001",
+    "title": "Simple Clean Daily",
+    "dripper": "Simple Dripper",
+    "paper": "Nudo Thin Paper",
+    "goal": "Daily brew lebih clean, ringan, dan terang",
+    "bean_fit": [
+      "Washed light-medium",
+      "Kenya",
+      "Puntang",
+      "Ethiopia washed"
+    ],
+    "dose_g": 15,
+    "water_g": 250,
+    "ratio": "1:16.7",
+    "temperature_c": "91–93°C",
+    "grind": "Medium-fine",
+    "df64_start": "Sedikit lebih halus dari simple + common",
+    "brew_time": "2:20–2:50",
+    "pouring": [
+      "0:00 — Bloom 45 g",
+      "0:40 — Tuang sampai 125 g",
+      "1:10 — Tuang sampai 190 g",
+      "1:35 — Tuang sampai 250 g"
+    ],
+    "reason": [
+      "Nudo meningkatkan clarity.",
+      "Simple dripper menjaga repeatability.",
+      "Lebih ringan dan terang untuk daily brew."
+    ],
+    "target_profile": {
+      "aroma": "Terang",
+      "acidity": "Fresh",
+      "sweetness": "Clean",
+      "body": "Light-medium",
+      "finish": "Clean"
+    },
+    "troubleshooting": {
+      "Terlalu tipis": "Haluskan grind.",
+      "Terlalu tajam": "Turunkan suhu 1°C.",
+      "Kurang sweet": "Tambah satu pouring kecil.",
+      "Flow terlalu cepat": "Haluskan grind."
+    },
+    "status": "AI Recommended",
+    "notes": "Daily clean brew dengan karakter lebih modern."
+  }
+]
