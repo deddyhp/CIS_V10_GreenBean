@@ -1,4 +1,5 @@
 import inspect
+import pandas as pd
 import streamlit as st
 import utils.database as db
 
@@ -22,7 +23,7 @@ except Exception as exc:
     st.stop()
 
 st.title("🌱 Green Bean Database")
-st.caption("Coffee Intelligent System • V10.9")
+st.caption("Coffee Intelligent System • V10.10")
 
 st.divider()
 
@@ -157,6 +158,51 @@ if "acquisition_price_per_kg" not in df.columns:
 if df.empty:
     st.info("Belum ada Green Bean yang ditemukan di Google Sheets.")
 else:
+    # ==========================================================
+    # INVENTORY SUMMARY
+    # Summary follows the currently displayed search/filter result.
+    # Weighted average excludes stock with price Rp0 / not yet filled.
+    # ==========================================================
+    stock_series = pd.to_numeric(
+        df.get("stock"),
+        errors="coerce",
+    ).fillna(0.0)
+
+    price_series = pd.to_numeric(
+        df.get("acquisition_price_per_kg"),
+        errors="coerce",
+    ).fillna(0.0)
+
+    stock_value_series = stock_series * price_series
+
+    total_stock = float(stock_series.sum())
+    total_stock_value = float(stock_value_series.sum())
+    active_beans = int((stock_series > 0).sum())
+
+    priced_mask = (stock_series > 0) & (price_series > 0)
+    priced_stock = float(stock_series.loc[priced_mask].sum())
+
+    weighted_average_price = (
+        float(stock_value_series.loc[priced_mask].sum()) / priced_stock
+        if priced_stock > 0
+        else 0.0
+    )
+
+    summary1, summary2, summary3, summary4 = st.columns(4)
+    summary1.metric("Total Stock", f"{total_stock:,.2f} kg")
+    summary2.metric("Total Stock Value", f"Rp {total_stock_value:,.0f}")
+    summary3.metric("Avg Price / kg", f"Rp {weighted_average_price:,.0f}")
+    summary4.metric("Active Beans", f"{active_beans}")
+
+    unpriced_stock = float(
+        stock_series.loc[(stock_series > 0) & (price_series <= 0)].sum()
+    )
+    if unpriced_stock > 0:
+        st.caption(
+            "Weighted average dihitung hanya dari stock yang sudah memiliki harga. "
+            f"Masih ada {unpriced_stock:,.2f} kg stock dengan harga Rp0 / belum diisi."
+        )
+
     stock_display = df[[
         "bean_id", "bean_name", "species", "origin", "process",
         "stock", "acquisition_price_per_kg", "location"
