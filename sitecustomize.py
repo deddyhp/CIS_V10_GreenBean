@@ -210,3 +210,70 @@ if st is not None and not getattr(st, "_cis_theme_wrapped", False):
 
     st.set_page_config = _cis_set_page_config
     st._cis_theme_wrapped = True
+
+
+# Green Bean inventory summary injection.
+# This wraps st.dataframe and adds inventory metrics immediately before
+# the Green Bean stock table, without changing the page database logic.
+if st is not None and not getattr(st, "_cis_inventory_summary_wrapped", False):
+    try:
+        import pandas as pd
+
+        _original_dataframe = st.dataframe
+
+        def _cis_dataframe(data=None, *args, **kwargs):
+            try:
+                if isinstance(data, pd.DataFrame):
+                    required = {
+                        "Bean ID",
+                        "Bean Name",
+                        "Stock (kg)",
+                        "Acquisition Price / kg (Rp)",
+                        "Stock Value (Rp)",
+                    }
+                    if required.issubset(set(data.columns)):
+                        stock = pd.to_numeric(
+                            data["Stock (kg)"], errors="coerce"
+                        ).fillna(0.0)
+                        price = pd.to_numeric(
+                            data["Acquisition Price / kg (Rp)"], errors="coerce"
+                        ).fillna(0.0)
+                        stock_value = stock * price
+
+                        total_stock = float(stock.sum())
+                        total_value = float(stock_value.sum())
+                        active_beans = int((stock > 0).sum())
+
+                        priced_mask = (stock > 0) & (price > 0)
+                        priced_stock = float(stock.loc[priced_mask].sum())
+                        weighted_avg = (
+                            float(stock_value.loc[priced_mask].sum()) / priced_stock
+                            if priced_stock > 0
+                            else 0.0
+                        )
+
+                        c1, c2, c3, c4 = st.columns(4)
+                        c1.metric("Total Stock", f"{total_stock:,.2f} kg")
+                        c2.metric("Total Stock Value", f"Rp {total_value:,.0f}")
+                        c3.metric("Avg Price / kg", f"Rp {weighted_avg:,.0f}")
+                        c4.metric("Active Beans", f"{active_beans}")
+
+                        unpriced_stock = float(
+                            stock.loc[(stock > 0) & (price <= 0)].sum()
+                        )
+                        if unpriced_stock > 0:
+                            st.caption(
+                                "Weighted average dihitung dari stock yang sudah "
+                                f"memiliki harga. Masih ada {unpriced_stock:,.2f} kg "
+                                "stock dengan harga Rp0 / belum diisi."
+                            )
+            except Exception:
+                # Never block the original table when summary calculation fails.
+                pass
+
+            return _original_dataframe(data, *args, **kwargs)
+
+        st.dataframe = _cis_dataframe
+        st._cis_inventory_summary_wrapped = True
+    except Exception:
+        pass
